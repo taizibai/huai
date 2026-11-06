@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吉他圖鑑｜Guitar Atlas</title>
+<style>
+:root{--bg:#101820;--panel:#192833;--panel2:#223541;--cream:#f5ecd9;--muted:#b9c5c9;--gold:#e8b86d;--line:#344954}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 85% 0%,#29404a 0,transparent 35%),var(--bg);color:var(--cream);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;line-height:1.6}
+header{padding:42px 20px 28px;text-align:center}
+.eyebrow{color:var(--gold);letter-spacing:.18em;font-size:.78rem;font-weight:700}
+h1{font-size:clamp(2rem,6vw,3.7rem);margin:8px 0 4px;line-height:1.15}
+header p{color:var(--muted);margin:10px auto;max-width:650px}
+.wrap{width:min(1100px,92%);margin:auto}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0 24px}
+button,.filter{border:1px solid var(--line);background:var(--panel2);color:var(--cream);padding:10px 15px;border-radius:999px;cursor:pointer;font:inherit}
+button:hover,.filter:hover,.filter.active{border-color:var(--gold);color:var(--gold)}
+button:focus-visible,.filter:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:16px;margin-bottom:26px}
+.card{background:linear-gradient(145deg,var(--panel),#15232c);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;min-height:290px}
+.art{height:118px;border-radius:13px;background:linear-gradient(135deg,#2a414b,#17262e);display:grid;place-items:center;font-size:4.4rem;margin-bottom:14px}
+.tag{color:var(--gold);font-size:.76rem;font-weight:700;letter-spacing:.08em}
+.card h2{font-size:1.25rem;margin:3px 0 7px}
+.card p{color:var(--muted);font-size:.93rem;margin:0 0 14px}
+.card .actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+.card button{font-size:.88rem;padding:8px 12px}
+.detail{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;margin:8px 0 26px}
+.detail h2{margin-top:0}
+.strings{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0}
+.string{border-radius:12px;padding:12px 4px;background:#263d49;border:1px solid #48616d;text-align:center}
+.string strong{display:block;font-size:1.1rem;color:var(--gold)}
+.string small{color:var(--muted)}
+.note{color:var(--muted);font-size:.88rem}
+footer{text-align:center;color:var(--muted);padding:22px;font-size:.85rem}
+@media(max-width:520px){.strings{grid-template-columns:repeat(3,1fr)}header{padding-top:30px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">INTERACTIVE GUITAR ENCYCLOPEDIA</div>
+  <h1>🎸 吉他圖鑑</h1>
+  <p>認識不同種類的吉他，聽聽六條弦的聲音。點選「試聽」或下方琴弦按鈕即可播放音效。</p>
+</header>
+<main class="wrap">
+  <nav class="toolbar" aria-label="吉他種類篩選">
+    <button class="filter active" data-filter="全部">全部</button>
+    <button class="filter" data-filter="木吉他">木吉他</button>
+    <button class="filter" data-filter="電吉他">電吉他</button>
+    <button class="filter" data-filter="特色吉他">特色吉他</button>
+  </nav>
+  <section class="grid" id="guitarGrid" aria-live="polite"></section>
+
+  <section class="detail">
+    <div class="tag">SOUND LAB · 聲音實驗室</div>
+    <h2>🎵 聽聽吉他的六條弦</h2>
+    <p>標準調弦由粗到細是 E、A、D、G、B、E。按下按鈕播放對應音高；聲音由瀏覽器即時合成，不需要另外下載音檔。</p>
+    <div class="strings" id="strings"></div>
+    <div class="toolbar" style="justify-content:flex-start;margin-bottom:4px">
+      <button id="playScale">▶ 播放簡單音階</button>
+      <button id="stopSound">■ 停止聲音</button>
+    </div>
+    <p class="note" id="soundStatus" aria-live="polite">提示：第一次播放時，請先點一下任一個聲音按鈕，允許瀏覽器啟用音訊。</p>
+  </section>
+</main>
+<footer>吉他圖鑑 · Guitar Atlas｜互動學習小作品</footer>
+<script>
+const guitars = [
+ {name:"民謠木吉他",type:"木吉他",icon:"🪕",desc:"常見的鋼弦木吉他，音色明亮、清晰，適合流行歌曲伴奏、刷弦與指彈。",facts:"特色：鋼弦、共鳴箱、通常使用六條弦。"},
+ {name:"古典吉他",type:"木吉他",icon:"🎼",desc:"使用尼龍弦，音色溫暖柔和，琴頸通常較寬，常用於古典音樂與指彈演奏。",facts:"特色：尼龍弦，常見標準調弦 E-A-D-G-B-E。"},
+ {name:"電吉他",type:"電吉他",icon:"🎸",desc:"透過拾音器將琴弦振動轉成電訊號，再由音箱放大，可呈現乾淨、失真等多種音色。",facts:"特色：實心或半空心琴身，常搭配效果器。"},
+ {name:"電貝斯",type:"電吉他",icon:"🎶",desc:"主要負責樂曲中的低音線條，常見四弦配置，讓節奏與和聲更有厚度。",facts:"特色：常見四弦調弦 E-A-D-G，音域比一般吉他低。"},
+ {name:"十二弦吉他",type:"特色吉他",icon:"✨",desc:"每組弦通常成對排列，共十二條弦，聲音有明亮、豐富的合唱感。",facts:"特色：雙弦組合，和弦聽起來更飽滿。"},
+ {name:"旅行吉他",type:"特色吉他",icon:"🧳",desc:"琴身或尺寸較小，方便攜帶與收納，適合旅行、練習和戶外演奏。",facts:"特色：輕巧便攜，但不同款式的音量與手感有所差異。"}
+];
+const grid=document.getElementById("guitarGrid");
+function render(filter="全部"){
+ grid.innerHTML="";
+ guitars.filter(g=>filter==="全部"||g.type===filter).forEach(g=>{
+  const card=document.createElement("article"); card.className="card";
+  card.innerHTML=`<div class="art" aria-hidden="true">${g.icon}</div><div class="tag">${g.type}</div><h2>${g.name}</h2><p>${g.desc}</p><p class="note">${g.facts}</p><div class="actions"><button class="listen">▶ 試聽示範音</button></div>`;
+  card.querySelector(".listen").addEventListener("click",()=>playTone(g.type==="電吉他"?196:220,1.1,g.type==="電吉他"?"electric":"acoustic"));
+  grid.appendChild(card);
+ });
+}
+document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active");render(b.dataset.filter);
+}));
+render();
+
+let audioCtx=null, activeNodes=[];
+function getContext(){
+ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ if(audioCtx.state==="suspended") audioCtx.resume();
+ return audioCtx;
+}
+function playTone(freq,duration=.7,timbre="acoustic"){
+ const ctx=getContext(), now=ctx.currentTime;
+ const master=ctx.createGain(); master.gain.setValueAtTime(.0001,now);
+ master.gain.exponentialRampToValueAtTime(.22,now+.012);
+ master.gain.exponentialRampToValueAtTime(.0001,now+duration);
+ master.connect(ctx.destination);
+ const partials=timbre==="electric"?[1,0.55,0.28,0.18]:[1,0.45,0.2,0.08];
+ partials.forEach((amp,i)=>{
+  const osc=ctx.createOscillator(), gain=ctx.createGain();
+  osc.type=timbre==="electric"?"sawtooth":"triangle";
+  osc.frequency.value=freq*(i+1);
+  gain.gain.value=amp/(i+1);
+  osc.connect(gain);gain.connect(master);
+  osc.start(now);osc.stop(now+duration+.03);
+  activeNodes.push(osc);
+ });
+ document.getElementById("soundStatus").textContent="正在播放示範音。音色為瀏覽器合成的近似效果，並非錄製的真實吉他。";
+}
+const stringNotes=[
+ {label:"第 6 弦",note:"E2",freq:82.41},{label:"第 5 弦",note:"A2",freq:110.00},
+ {label:"第 4 弦",note:"D3",freq:146.83},{label:"第 3 弦",note:"G3",freq:196.00},
+ {label:"第 2 弦",note:"B3",freq:246.94},{label:"第 1 弦",note:"E4",freq:329.63}
+];
+const strings=document.getElementById("strings");
+stringNotes.forEach(s=>{
+ const b=document.createElement("button");b.className="string";
+ b.innerHTML=`<strong>${s.note}</strong><small>${s.label}</small>`;
+ b.addEventListener("click",()=>playTone(s.freq,.9));
+ strings.appendChild(b);
+});
+document.getElementById("playScale").addEventListener("click",async()=>{
+ const ctx=getContext(); const notes=[82.41,110,146.83,196,246.94,329.63];
+ notes.forEach((f,i)=>setTimeout(()=>playTone(f,.48),i*520));
+ document.getElementById("soundStatus").textContent="正在依序播放六條空弦音。";
+});
+document.getElementById("stopSound").addEventListener("click",()=>{
+ if(audioCtx){audioCtx.close();audioCtx=null;}
+ activeNodes=[];document.getElementById("soundStatus").textContent="聲音已停止。再次點擊琴弦即可播放。";
+});
+</script>
+</body>
+</html>
